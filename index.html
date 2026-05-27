@@ -207,10 +207,16 @@
     .footer-line { color: var(--dim); margin-top: 1.5rem; font-size: 12px; }
     .footer-line a { color: var(--dim); }
 
-    /* Hide elements until JS reveals them (sequence). Fallback: show all. */
-    .seq { opacity: 0; transition: opacity .12s; }
-    .seq.in { opacity: 1; }
-    .no-js .seq { opacity: 1; }
+    /* Reveal control: containers fade in instant per-step;
+       individual rows/lines flip from visibility:hidden as they "print". */
+    .seq      { opacity: 0; transition: opacity 0s; }
+    .seq.in   { opacity: 1; }
+    .hidden   { visibility: hidden; }
+    .no-js .seq    { opacity: 1; }
+    .no-js .hidden { visibility: visible; }
+
+    /* Multi-line dim block prints each line as a separate row. */
+    .dim-multi > .dim-line { display: block; }
   </style>
 </head>
 <body class="no-js">
@@ -249,11 +255,11 @@
           <span class="perm">drwxr-xr-x</span><span class="size">infra</span><span class="name dir">ambler-drive/</span>
           <span class="perm">drwxr-xr-x</span><span class="size">meta</span><span class="name dir">agentic-os/</span>
         </div>
-        <div class="out dim seq" data-step="3" style="margin-top:-.6rem;">
-          # viml.ai: vertical intelligence for high-margin local operators<br />
-          # qs: wearable biometrics &rarr; daily mood forecast<br />
-          # ambler-drive: small gpu fleet, repurposed for vast.ai hosting<br />
-          # agentic-os: multi-model council running the desk
+        <div class="out dim dim-multi seq" data-step="3" style="margin-top:-.6rem;">
+          <span class="dim-line"># viml.ai &mdash; vertical intelligence for high-margin local operators</span>
+          <span class="dim-line"># qs &mdash; wearable biometrics &rarr; daily mood forecast</span>
+          <span class="dim-line"># ambler-drive &mdash; small gpu fleet, repurposed for vast.ai hosting</span>
+          <span class="dim-line"># agentic-os &mdash; multi-model council running the desk</span>
         </div>
 
         <!-- 4. cat .principles -->
@@ -293,61 +299,153 @@
     document.getElementById('y').textContent = new Date().getFullYear();
 
     const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const SHELL_PAUSE  = prefersReduced ? 0 : 220;
+    const ROW_PAUSE    = prefersReduced ? 0 : 55;
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-    // Type a string into an element, char-by-char, with a temporary caret.
-    function typeInto(el, text, speed) {
-      return new Promise(resolve => {
-        if (prefersReduced) { el.textContent = text; return resolve(); }
-        el.textContent = '';
-        const caret = document.createElement('span');
-        caret.className = 'caret';
-        caret.setAttribute('aria-hidden', 'true');
-        el.after(caret);
-        let i = 0;
-        const tick = () => {
-          el.textContent = text.slice(0, ++i);
-          if (i < text.length) {
-            // Vary speed slightly for human feel; faster on spaces.
-            const jitter = text[i-1] === ' ' ? 10 : 18 + Math.random() * 30;
-            setTimeout(tick, speed != null ? speed : jitter);
-          } else {
-            caret.remove();
-            resolve();
-          }
-        };
-        setTimeout(tick, 80);
-      });
+    /* Single global caret element — moves between the active node it's
+       trailing. Only ever one on screen, so the cursor "follows the typist". */
+    const caret = document.createElement('span');
+    caret.className = 'caret';
+    caret.setAttribute('aria-hidden', 'true');
+    function attachCaret(after) { if (after && after.parentNode) after.after(caret); }
+    function detachCaret()      { caret.remove(); }
+
+    /* Type a string into an element, char-by-char. */
+    async function typeText(el, text, baseSpeed) {
+      if (prefersReduced) { el.textContent = text; return; }
+      el.textContent = '';
+      attachCaret(el);
+      for (let i = 1; i <= text.length; i++) {
+        el.textContent = text.slice(0, i);
+        const ch = text[i - 1];
+        let d;
+        if (ch === ' ')                    d = 14;
+        else if (/[.,/\-_:]/.test(ch))     d = 28;
+        else                                d = (baseSpeed || 18) + Math.random() * 30;
+        await sleep(d);
+      }
     }
 
+    /* Type the textContent of a node that may have inline HTML children.
+       Strategy: stash innerHTML, blank it, then reveal incrementally by
+       restoring a substring measured against textContent length.
+       Caret rides at the end of the visible text. */
+    async function typeInlineHTML(node, perChar = 16) {
+      if (prefersReduced) return; // already visible (no .hidden flip pre-call)
+      const fullHTML  = node.innerHTML;
+      const fullText  = node.textContent;
+      node.textContent = '';
+      attachCaret(node);
+      // Walk char-by-char of textContent. Each step, find the smallest
+      // prefix of fullHTML whose textContent length === current count.
+      const probe = document.createElement('span');
+      let lastLen = 0;
+      for (let i = 1; i <= fullText.length; i++) {
+        // Grow probe until its textContent length hits i (or we run out).
+        // Binary search wastes time; linear is fine for short paragraphs.
+        let lo = lastLen, hi = fullHTML.length, best = hi;
+        while (lo <= hi) {
+          const mid = (lo + hi) >> 1;
+          probe.innerHTML = fullHTML.slice(0, mid);
+          if (probe.textContent.length >= i) { best = mid; hi = mid - 1; }
+          else lo = mid + 1;
+        }
+        lastLen = best;
+        node.innerHTML = fullHTML.slice(0, best);
+        attachCaret(node); // re-attach (innerHTML rewrites detach it)
+        const ch = fullText[i - 1];
+        let d;
+        if (ch === ' ')                d = 12;
+        else if (/[.,/\-_:]/.test(ch)) d = 24;
+        else                            d = perChar + Math.random() * 22;
+        await sleep(d);
+      }
+      node.innerHTML = fullHTML;
+    }
+
+    /* Reveal a multi-row block one row at a time, caret riding the last row. */
+    async function printRows(rows, perRow) {
+      for (const row of rows) {
+        row.classList.remove('hidden');
+        attachCaret(row);
+        await sleep(perRow != null ? perRow : ROW_PAUSE);
+      }
+    }
+
+    /* Per-step output handler. We pre-hide everything inside each .seq
+       block (rows / inline paragraphs) and reveal them after the
+       corresponding command finishes typing. */
+    async function revealStep(step) {
+      const blocks = document.querySelectorAll(`.seq[data-step="${step}"]`);
+      // Make the wrappers visible (opacity), but their children stay hidden.
+      blocks.forEach(b => b.classList.add('in'));
+
+      for (const block of blocks) {
+        if (block.classList.contains('out') && !block.classList.contains('dim-multi')) {
+          // single-line answer (e.g. whoami output): type as text
+          await typeText(block, block.dataset.text || block.textContent.trim(), 14);
+        } else if (block.classList.contains('cat')) {
+          // paragraph with inline markup: incrementally render HTML
+          await typeInlineHTML(block, 12);
+        } else if (block.classList.contains('ls') || block.classList.contains('principles') || block.classList.contains('dim-multi')) {
+          // multi-row blocks: print row by row
+          const rows = Array.from(block.children);
+          await printRows(rows);
+        } else if (block.classList.contains('line')) {
+          // a bare PS1 prompt line shown between commands (e.g. the new cwd line)
+          // no extra typing needed — it just appears as the shell would
+          await sleep(40);
+        } else if (block.classList.contains('footer-line')) {
+          await sleep(60);
+        }
+      }
+    }
+
+    /* Boot: walk through each typed command in order, type it, then
+       reveal that step's output incrementally. */
     async function run() {
-      // Collect every step group: type command, then reveal that step's output.
-      const steps = [];
-      document.querySelectorAll('.cmd[data-type]').forEach((c, idx) => {
-        steps.push({ cmd: c, step: idx + 1 });
+      // Pre-hide every row inside seq blocks so nothing pops in.
+      document.querySelectorAll('.seq .ls > *, .seq.ls > *, .seq.principles > li, .seq.dim-multi > .dim-line').forEach(el => el.classList.add('hidden'));
+      // For ls blocks that ARE the .seq themselves, hide their children too:
+      document.querySelectorAll('.seq.ls > *, .seq.principles > li, .seq.dim-multi > .dim-line').forEach(el => el.classList.add('hidden'));
+
+      // Cache stashed text for typed single-line outputs:
+      document.querySelectorAll('.seq.out').forEach(el => {
+        if (!el.classList.contains('dim-multi')) {
+          el.dataset.text = el.textContent.replace(/\s+/g, ' ').trim();
+        }
       });
 
-      // Final caret hidden until last step reached.
+      // Final live caret hidden until the demo finishes.
       const liveCaret = document.getElementById('liveCaret');
       liveCaret.style.display = 'none';
 
-      // Show step-1 outputs alongside step-1 typing (so the first whoami answer appears under it)
-      // We reveal `.seq[data-step=N]` AFTER typing step N's command finishes.
-      for (const { cmd, step } of steps) {
-        await typeInto(cmd, cmd.dataset.type);
-        // Brief pause like a real shell, then reveal the output of this step
-        await new Promise(r => setTimeout(r, prefersReduced ? 0 : 180));
-        document.querySelectorAll(`.seq[data-step="${step}"]`).forEach(el => el.classList.add('in'));
-        await new Promise(r => setTimeout(r, prefersReduced ? 0 : 220));
+      const cmds = Array.from(document.querySelectorAll('.cmd[data-type]'));
+      for (const c of cmds) {
+        // Reveal the prompt line wrapper first (so the typed text is visible).
+        const lineWrap = c.closest('.seq');
+        if (lineWrap) lineWrap.classList.add('in');
+
+        const stepNum = Number(c.closest('[data-step]')?.dataset.step || 0);
+
+        // Type the command (caret rides the end of the command text)
+        await typeText(c, c.dataset.type, 14);
+        detachCaret();
+        await sleep(SHELL_PAUSE);
+
+        // Reveal output(s) for this step
+        await revealStep(stepNum);
+        detachCaret();
+        await sleep(80);
       }
 
+      // Done: show persistent blinking cursor at the live prompt.
       liveCaret.style.display = '';
     }
 
-    // Reveal step 1 line wrapper immediately (the prompt is always visible)
     document.addEventListener('DOMContentLoaded', () => {
-      // Step 1's output is wrapped in .seq; reveal lazily inside run().
-      // Run after a tiny delay so the page paints first.
-      setTimeout(run, 250);
+      setTimeout(run, 220);
     });
   </script>
 </body>
