@@ -347,15 +347,24 @@ const PANES = {
     path: "~/projects/qs",
     steps: [
       { cwd: "~/projects/qs", cmd: "cat README.md",
-        out: `<div class="cat">multi-vendor biometric pipeline. pulls <span class="k">ultrahuman</span>, <span class="k">whoop</span>, <span class="k">oura</span>, and siloed iOS/Apple data into one store. goal: predict advanced correlations from time-series to optimize future routines. biometrics + digital context &rarr; ML model for correlation.</div>` },
-      { cwd: "~/projects/qs", cmd: "ls -la",
+        out: `<div class="cat">data pipelines for a fully <span class="k">quantified life</span>. pulls biometrics (ultrahuman), iOS context (location, screen time, messages, calendar, email), productivity (tasks done, active projects, scheduling cadence), training (hevy &mdash; sets, weights, exercises, gym days, session timing), nutrition (calories, macros, weight in kg), and mental health (self-coded nightly journal: PHQ-9 + other self-assessments) into one unified store.<br/><br/>all of it gets fed to <span class="k">ML</span>. the goal is to answer questions like <em style="color:var(--yellow)">"does a late saturday-night workout + heavy screen time cause low productivity tuesday morning?"</em> &mdash; stop guessing what the ideal routine is. the machine knows everything and tells me how present behavior shapes near-future outcomes.</div>` },
+      { cwd: "~/projects/qs", cmd: "ls -la sources/",
         out: `<div class="ls">
-          <span class="perm">drwxr-xr-x</span><span class="size">ETL</span><span class="name dir">ultrahuman/</span>
-          <span class="perm">drwxr-xr-x</span><span class="size">ETL</span><span class="name dir">etl/</span>
-          <span class="perm">-rw-r--r--</span><span class="size">store</span><span class="name">qs.db</span>
+          <span class="perm">drwxr-xr-x</span><span class="size">bio</span><span class="name dir">ultrahuman/</span>
+          <span class="perm">drwxr-xr-x</span><span class="size">ios</span><span class="name dir">location/</span>
+          <span class="perm">drwxr-xr-x</span><span class="size">ios</span><span class="name dir">screentime/</span>
+          <span class="perm">drwxr-xr-x</span><span class="size">ios</span><span class="name dir">messages/</span>
+          <span class="perm">drwxr-xr-x</span><span class="size">ios</span><span class="name dir">calendar/</span>
+          <span class="perm">drwxr-xr-x</span><span class="size">ios</span><span class="name dir">email/</span>
+          <span class="perm">drwxr-xr-x</span><span class="size">work</span><span class="name dir">productivity/</span>
+          <span class="perm">drwxr-xr-x</span><span class="size">train</span><span class="name dir">hevy/</span>
+          <span class="perm">drwxr-xr-x</span><span class="size">diet</span><span class="name dir">nutrition/</span>
+          <span class="perm">drwxr-xr-x</span><span class="size">mind</span><span class="name dir">journal/</span>
         </div>` },
+      { cwd: "~/projects/qs", cmd: "head -1 store/schema.sql && echo '...' && wc -l store/schema.sql",
+        out: `<div class="out dim">-- unified time-series store: one row per (timestamp, signal, value)<br/>...<br/>~/projects/qs/store/schema.sql</div>` },
       { cwd: "~/projects/qs", cmd: "crontab -l | grep qs",
-        out: `<div class="out dim">0 6 * * * qs/ultrahuman/cron_wrap.sh  # daily 06:00</div>` },
+        out: `<div class="out dim">0 6 * * * qs/ultrahuman/cron_wrap.sh   # daily bio pull<br/>5 6 * * * qs/etl/run.sh               # unify + index</div>` },
     ]
   },
 
