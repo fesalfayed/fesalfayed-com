@@ -622,7 +622,29 @@ const COMMANDS = {
   huggingface: { desc: 'open huggingface', run: (ctx) => COMMANDS.hf.run(ctx) },
   email:  { desc: 'compose email', run: (ctx) => { location.href = 'mailto:hi@fesalfayed.com'; printOut(ctx, `<div class="out dim"># mail to hi@fesalfayed.com</div>`); }},
   date:   { desc: 'current time', run: (ctx) => printOut(ctx, `<div class="out">${new Date().toString()}</div>`) },
-  sudo:   { desc: 'denied', run: (ctx) => printOut(ctx, `<div class="out err">fesal is not in the sudoers file. This incident will be reported.</div>`) },
+  sudo:   { desc: 'denied', run: (ctx) => {
+    const lines = [
+      'fesal is not in the sudoers file. This incident will be reported.',
+      'sudo: a password is required',
+      'sudo: 1 incorrect password attempt',
+      'sudo: 3 incorrect password attempts',
+      'Sorry, try again.',
+      'Sorry, user fesal is not allowed to execute that as root.',
+      '[sudo] password for fesal: ********  &mdash; Sorry, try again.',
+      'sudo: unable to resolve host fayed: temporary failure in name resolution',
+      'permission denied (publickey).',
+      'sudo: command not found. did you mean: <span style="color:var(--blue)">help</span>?',
+      'nice try.',
+      'lol no.',
+      'absolutely not.',
+      'this is a static site. there is no root to be.',
+      'You are not in the sudoers file. Mom has been notified.',
+      'sudo: real users use <span style="color:var(--blue)">doas</span> anyway',
+      'sudo: refusing to escalate &mdash; agents type, humans steer.',
+      'access denied. but i admire your ambition.',
+    ];
+    printOut(ctx, `<div class="out err">${lines[Math.floor(Math.random()*lines.length)]}</div>`);
+  }},
   exit:   { desc: 'alias for close', run: (ctx) => COMMANDS.close.run(ctx) },
 };
 // shortcut command 'open <key>'
