@@ -273,9 +273,9 @@ const PANES = {
     path: "~",
     steps: [
       { cwd: "~", cmd: "whoami",
-        out: `<div class="out">I build agents and fine-tune models.</div>` },
+        out: `<div class="out">Data &amp; ML Engineer<br/><span style="color:var(--dim)">B.S. Data Science &amp; Artificial Intelligence &mdash; Florida International University</span></div>` },
       { cwd: "~", cmd: "cat about.md",
-        out: `<div class="cat">I build <span class="k">agentic systems</span> &mdash; software that runs on its own and earns its keep. Mostly applied to problems horizontal tools never quite fit.</div>` },
+        out: `<div class="cat">I build <span class="k">agents</span> and fine-tune <span class="k">models</span>. The thread underneath all of it is an obsession with <span class="k">data</span> &mdash; finding it, cleaning it, moving it, modeling it. I spend most of my time engineering pipelines that turn messy, siloed sources (wearables, scraped reviews, ad libraries, agent traces) into structured signal you can actually do something with: train on, fine-tune against, correlate over time, or feed back into the loop. Pipelines are the unglamorous part everyone skips &mdash; they're also the part that decides whether the cool stuff on top actually works.</div>` },
       { cwd: "~", cmd: "cd projects/ && ls -la",
         cwdAfter: "~/projects",
         out: `<div class="ls">
