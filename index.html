@@ -4,65 +4,266 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fesal Fayed</title>
-  <meta name="description" content="Fesal Fayed — builder, founder, agentic systems." />
+  <meta name="description" content="Fesal Fayed — builder, founder. Agentic systems, quantified self, vertical intelligence." />
+  <meta name="theme-color" content="#0a0a0a" />
   <meta property="og:title" content="Fesal Fayed" />
   <meta property="og:description" content="Builder. Founder. Agentic systems." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://fesalfayed.com" />
+  <link rel="canonical" href="https://fesalfayed.com" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E◆%3C/text%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet" />
+
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            body:    ['"Source Serif 4"', 'serif'],
+            mono:    ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            ink:    '#0a0a0a',
+            paper:  '#f5f4ef',
+            accent: '#2563eb',
+          },
+        },
+      },
+    };
+  </script>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
-    html { font-family: 'Inter', system-ui, sans-serif; }
-    .mono { font-family: 'JetBrains Mono', monospace; }
-    .grain::before {
-      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: .04;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    :root {
+      color-scheme: dark;
+      --type-display: clamp(3.25rem, 11vw, 8.5rem);
+      --ease-out:     cubic-bezier(.16,1,.3,1);
     }
-    a.link { position: relative; }
+
+    html { font-family: 'Source Serif 4', Georgia, serif; -webkit-font-smoothing: antialiased; }
+    body { background: #0a0a0a; color: #e8e6e0; }
+
+    /* Subtle film grain — performance-cheap, prefers-reduced data friendly */
+    .grain::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: .035;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* Hairline tag — JetBrains Mono uppercase tracking-widest for labels/dates */
+    .tag { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: #8b8a82; }
+
+    /* Display heading: Playfair 900, tight leading, graphic breaks */
+    .display { font-family: 'Playfair Display', serif; font-weight: 900; letter-spacing: -0.04em; line-height: 0.92; }
+
+    /* Animated underline */
+    a.link { position: relative; transition: color .25s var(--ease-out); }
     a.link::after {
       content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px;
-      background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .3s ease;
+      background: currentColor; transform: scaleX(0); transform-origin: left;
+      transition: transform .35s var(--ease-out);
     }
-    a.link:hover::after { transform: scaleX(1); }
+    a.link:hover::after, a.link:focus-visible::after { transform: scaleX(1); }
+
+    /* Visible focus ring (WCAG) */
+    :focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; border-radius: 2px; }
+
+    /* Section divider hair */
+    .hair { height: 1px; background: linear-gradient(90deg, transparent, #2a2926 18%, #2a2926 82%, transparent); }
+
+    /* Scroll-revealed sections */
+    .reveal { opacity: 0; transform: translateY(14px); transition: opacity .8s var(--ease-out), transform .8s var(--ease-out); }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+
+    /* Status dot */
+    .dot { display: inline-block; width: 6px; height: 6px; border-radius: 999px; background: #4ade80; box-shadow: 0 0 0 4px rgba(74,222,128,.12); margin-right: .5rem; vertical-align: 1px; }
+
+    /* Project rows */
+    .row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid #1a1916; transition: padding .35s var(--ease-out); }
+    .row:last-child { border-bottom: 0; }
+    .row:hover { padding-left: .5rem; }
+    .row dt { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; color: #f5f4ef; }
+    .row dd { color: #a8a69d; font-style: italic; align-self: end; text-align: right; font-size: .95rem; }
+    .row .blurb { grid-column: 1 / -1; color: #b7b5ac; font-size: 1.025rem; max-width: 60ch; }
+
+    /* Marquee of words (decorative, not essential) */
+    .marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+    .marquee-track { display: inline-flex; gap: 3rem; animation: drift 38s linear infinite; will-change: transform; }
+    @keyframes drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* Reduced motion: kill non-essential animation */
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .marquee-track { animation: none; }
+      a.link::after { transition: none; }
+      * { scroll-behavior: auto !important; }
+    }
+
+    /* Print: paper mode */
+    @media print {
+      body { background: #fff; color: #000; }
+      .grain::before, .marquee, .dot { display: none; }
+      .hair { background: #000; }
+      a { color: #000; text-decoration: underline; }
+    }
   </style>
 </head>
-<body class="bg-neutral-950 text-neutral-200 grain antialiased">
-  <main class="relative z-10 max-w-2xl mx-auto px-6 py-20 sm:py-32">
+<body class="bg-ink text-neutral-200 grain antialiased">
 
-    <header class="mb-16">
-      <p class="mono text-xs text-neutral-500 mb-3">◆ fesalfayed.com</p>
-      <h1 class="text-4xl sm:text-5xl font-light tracking-tight text-white">
-        Fesal Fayed
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:bg-accent focus:text-white focus:px-3 focus:py-2 focus:rounded">Skip to content</a>
+
+  <main id="main" class="relative z-10 max-w-3xl mx-auto px-6 sm:px-8 py-16 sm:py-24">
+
+    <!-- ◆ HERO ──────────────────────────────────────────────────── -->
+    <header class="mb-24 sm:mb-32">
+      <p class="tag mb-6"><span class="dot"></span>fesalfayed.com · est. 2024</p>
+      <h1 class="display text-white" style="font-size: var(--type-display);">
+        Fesal<br />Fayed<span class="text-accent">.</span>
       </h1>
-      <p class="mt-3 text-neutral-400">
-        Builder. Founder. Working on agentic systems and the
-        <span class="text-neutral-200">quantified self</span>.
+      <p class="mt-8 max-w-xl text-lg sm:text-xl text-neutral-300 leading-relaxed">
+        Builder &amp; founder. I make
+        <em class="text-white font-medium">agentic systems</em> &mdash;
+        software that runs on its own and earns its keep. Currently building
+        <em class="text-white font-medium">vertical intelligence</em> for
+        operators who'd rather ship than scroll.
       </p>
+      <div class="mt-10 flex flex-wrap items-center gap-4 text-sm">
+        <a href="#building" class="link text-white font-medium">See what I'm building →</a>
+        <span class="text-neutral-700">·</span>
+        <a href="mailto:hi@fesalfayed.com" class="link text-neutral-400 hover:text-white">hi@fesalfayed.com</a>
+      </div>
     </header>
 
-    <section class="mb-16">
-      <h2 class="mono text-xs uppercase tracking-widest text-neutral-500 mb-4">Now</h2>
-      <ul class="space-y-3 text-neutral-300">
-        <li><span class="text-white">viml.ai</span> — <span class="text-neutral-500 italic">stealth</span>.</li>
-        <li><span class="text-white">qs</span> — multi-vendor biometric pipeline (Whoop, Ultrahuman, Oura).</li>
-        <li><span class="text-white">agentic-os</span> — a personal operating system run by AI agents.</li>
-      </ul>
+    <div class="hair mb-16"></div>
+
+    <!-- ◆ NOW ───────────────────────────────────────────────────── -->
+    <section class="mb-24 reveal" aria-labelledby="now-heading">
+      <div class="grid grid-cols-12 gap-6 mb-10">
+        <p class="tag col-span-12 sm:col-span-3 sm:pt-2">◆ Now</p>
+        <h2 id="now-heading" class="display col-span-12 sm:col-span-9 text-3xl sm:text-4xl text-white">
+          One week, four threads.
+        </h2>
+      </div>
+      <p class="max-w-xl text-neutral-400 sm:ml-[25%] leading-relaxed">
+        A vertical-intelligence product for local operators (stealth).
+        A multi-vendor biometric pipeline merging Whoop, Ultrahuman, and Oura
+        into one signal. An agentic OS that runs my desk while I sleep. And
+        the occasional research note.
+      </p>
     </section>
 
-    <section class="mb-16">
-      <h2 class="mono text-xs uppercase tracking-widest text-neutral-500 mb-4">Elsewhere</h2>
-      <ul class="space-y-2">
-        <li><a class="link text-neutral-200 hover:text-white" href="https://github.com/fesalfayed">github</a></li>
-        <li><a class="link text-neutral-200 hover:text-white" href="https://huggingface.co/fesalfayed">huggingface</a></li>
+    <!-- ◆ BUILDING ─────────────────────────────────────────────── -->
+    <section id="building" class="mb-24 reveal" aria-labelledby="building-heading">
+      <div class="grid grid-cols-12 gap-6 mb-10">
+        <p class="tag col-span-12 sm:col-span-3 sm:pt-2">◆ Building</p>
+        <h2 id="building-heading" class="display col-span-12 sm:col-span-9 text-3xl sm:text-4xl text-white">
+          Work in flight.
+        </h2>
+      </div>
+
+      <dl class="sm:ml-[25%]">
+        <div class="row">
+          <dt>viml.ai</dt>
+          <dd>stealth</dd>
+          <p class="blurb">Vertical intelligence for high-margin local operators. Built around the operator, not the agency.</p>
+        </div>
+        <div class="row">
+          <dt>qs</dt>
+          <dd>personal</dd>
+          <p class="blurb">Unified quantified-self store. One canonical schema across Whoop, Ultrahuman, Oura. Daily digests that actually matter.</p>
+        </div>
+        <div class="row">
+          <dt>agentic-os</dt>
+          <dd>infra</dd>
+          <p class="blurb">A personal operating system run by a council of LLM agents. Discord as the cockpit. Kanban as the work surface. Notion as the brain.</p>
+        </div>
+        <div class="row">
+          <dt>hermes</dt>
+          <dd>oss</dd>
+          <p class="blurb">Multi-platform agent gateway &mdash; iMessage, Discord, Slack, CLI &mdash; with persistent memory, skills, and a council protocol for multi-model collaboration.</p>
+        </div>
+      </dl>
+    </section>
+
+    <!-- ◆ APPROACH ─────────────────────────────────────────────── -->
+    <section class="mb-24 reveal" aria-labelledby="approach-heading">
+      <div class="grid grid-cols-12 gap-6 mb-10">
+        <p class="tag col-span-12 sm:col-span-3 sm:pt-2">◆ Approach</p>
+        <h2 id="approach-heading" class="display col-span-12 sm:col-span-9 text-3xl sm:text-4xl text-white">
+          Fix upstream<span class="text-accent">.</span> Ship narrow<span class="text-accent">.</span>
+        </h2>
+      </div>
+      <div class="sm:ml-[25%] grid sm:grid-cols-2 gap-x-10 gap-y-8 text-neutral-300 leading-relaxed">
+        <p><span class="tag block mb-2">01 · Root, not patch</span>Given ship-now vs. fix-the-root, I pick the root every time. 30 minutes upstream beats 3 hours of follow-ups.</p>
+        <p><span class="tag block mb-2">02 · Local default</span>Compute lives on the machine I own. Sidecars escalate to cloud only under load, and revert when clear.</p>
+        <p><span class="tag block mb-2">03 · Agents do the work</span>Humans pick the direction, agents do the typing. The org chart is a multi-model council, not a Jira board.</p>
+        <p><span class="tag block mb-2">04 · One project, one repo</span>No mixing. Hard isolation between client work, personal infra, and research. Every directory has one job.</p>
+      </div>
+    </section>
+
+    <!-- ◆ MARQUEE (decorative) ─────────────────────────────────── -->
+    <div class="marquee py-6 mb-24 border-y border-neutral-900" aria-hidden="true">
+      <div class="marquee-track display text-neutral-800 text-4xl whitespace-nowrap">
+        <span>agentic systems</span><span>·</span>
+        <span>vertical intelligence</span><span>·</span>
+        <span>quantified self</span><span>·</span>
+        <span>multi-model councils</span><span>·</span>
+        <span>local-first compute</span><span>·</span>
+        <span>operator software</span><span>·</span>
+        <span>agentic systems</span><span>·</span>
+        <span>vertical intelligence</span><span>·</span>
+        <span>quantified self</span><span>·</span>
+        <span>multi-model councils</span><span>·</span>
+        <span>local-first compute</span><span>·</span>
+        <span>operator software</span><span>·</span>
+      </div>
+    </div>
+
+    <!-- ◆ ELSEWHERE ────────────────────────────────────────────── -->
+    <section class="mb-24 reveal" aria-labelledby="elsewhere-heading">
+      <div class="grid grid-cols-12 gap-6 mb-10">
+        <p class="tag col-span-12 sm:col-span-3 sm:pt-2">◆ Elsewhere</p>
+        <h2 id="elsewhere-heading" class="display col-span-12 sm:col-span-9 text-3xl sm:text-4xl text-white">
+          Talk to me<span class="text-accent">.</span>
+        </h2>
+      </div>
+      <ul class="sm:ml-[25%] grid sm:grid-cols-2 gap-x-6 gap-y-3 text-lg">
         <li><a class="link text-neutral-200 hover:text-white" href="mailto:hi@fesalfayed.com">hi@fesalfayed.com</a></li>
+        <li><a class="link text-neutral-200 hover:text-white" href="https://github.com/fesalfayed" rel="me">github.com/fesalfayed</a></li>
+        <li><a class="link text-neutral-200 hover:text-white" href="https://huggingface.co/fesalfayed" rel="me">huggingface.co/fesalfayed</a></li>
+        <li><a class="link text-neutral-200 hover:text-white" href="https://x.com/fesalfayed" rel="me">x.com/fesalfayed</a></li>
       </ul>
     </section>
 
-    <footer class="mono text-xs text-neutral-600 pt-12 border-t border-neutral-900">
-      © <span id="y"></span> Fesal Fayed · built by agents
+    <div class="hair mb-8"></div>
+
+    <!-- ◆ FOOTER ───────────────────────────────────────────────── -->
+    <footer class="pb-8 flex flex-wrap items-center justify-between gap-3">
+      <p class="tag">© <span id="y"></span> Fesal Fayed · built by agents</p>
+      <p class="tag text-neutral-700">v2 · ui-ux-pro-max</p>
     </footer>
+
   </main>
-  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+
+  <script>
+    // Year stamp
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // Scroll reveal — skip if reduced motion
+    const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!prefersReduced && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        }
+      }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+      document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+    } else {
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+    }
+  </script>
 </body>
 </html>
