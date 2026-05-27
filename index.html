@@ -328,37 +328,49 @@
     }
 
     /* Type the textContent of a node that may have inline HTML children.
-       Strategy: stash innerHTML, blank it, then reveal incrementally by
-       restoring a substring measured against textContent length.
-       Caret rides at the end of the visible text. */
+       The node's original innerHTML is stashed in dataset.html at boot
+       (and the node is already blank), so there's no flash of the
+       full content before typing starts. */
     async function typeInlineHTML(node, perChar = 16) {
-      if (prefersReduced) return; // already visible (no .hidden flip pre-call)
-      const fullHTML  = node.innerHTML;
-      const fullText  = node.textContent;
+      const fullHTML = node.dataset.html || node.innerHTML;
+      // Probe used to translate char-indexes-of-text -> length-of-html-prefix.
+      const probe = document.createElement('span');
+      probe.innerHTML = fullHTML;
+      const fullText = probe.textContent.replace(/\s+/g, ' ').trim();
+
+      if (prefersReduced) { node.innerHTML = fullHTML; return; }
+
       node.textContent = '';
       attachCaret(node);
-      // Walk char-by-char of textContent. Each step, find the smallest
-      // prefix of fullHTML whose textContent length === current count.
-      const probe = document.createElement('span');
-      let lastLen = 0;
-      for (let i = 1; i <= fullText.length; i++) {
-        // Grow probe until its textContent length hits i (or we run out).
-        // Binary search wastes time; linear is fine for short paragraphs.
-        let lo = lastLen, hi = fullHTML.length, best = hi;
-        while (lo <= hi) {
-          const mid = (lo + hi) >> 1;
-          probe.innerHTML = fullHTML.slice(0, mid);
-          if (probe.textContent.length >= i) { best = mid; hi = mid - 1; }
-          else lo = mid + 1;
+
+      // Precompute the HTML-prefix length for every text-length step,
+      // honoring the whitespace-collapse rule above. This avoids a
+      // binary-search-per-keystroke during the animation, and prevents
+      // mid-typing layout jitter from re-measuring.
+      const prefixLens = new Array(fullText.length + 1);
+      prefixLens[0] = 0;
+      let htmlPos = 0;
+      let textCount = 0;
+      // Walk fullHTML char by char; keep a running probe.textContent length.
+      // This is O(n^2) in the worst case for long paragraphs but our bio is short.
+      for (let h = 1; h <= fullHTML.length; h++) {
+        probe.innerHTML = fullHTML.slice(0, h);
+        const got = probe.textContent.replace(/\s+/g, ' ').trim().length;
+        while (textCount < got && textCount < fullText.length) {
+          textCount++;
+          prefixLens[textCount] = h;
         }
-        lastLen = best;
-        node.innerHTML = fullHTML.slice(0, best);
-        attachCaret(node); // re-attach (innerHTML rewrites detach it)
+        if (textCount >= fullText.length) break;
+      }
+
+      for (let i = 1; i <= fullText.length; i++) {
+        node.innerHTML = fullHTML.slice(0, prefixLens[i]);
+        attachCaret(node); // innerHTML rewrite detaches it
         const ch = fullText[i - 1];
         let d;
-        if (ch === ' ')                d = 12;
-        else if (/[.,/\-_:]/.test(ch)) d = 24;
-        else                            d = perChar + Math.random() * 22;
+        if (ch === ' ')                d = 10;
+        else if (/[.,/\-_:;]/.test(ch)) d = 22;
+        else                            d = perChar + Math.random() * 18;
         await sleep(d);
       }
       node.innerHTML = fullHTML;
@@ -405,17 +417,25 @@
     /* Boot: walk through each typed command in order, type it, then
        reveal that step's output incrementally. */
     async function run() {
-      // Pre-hide every row inside seq blocks so nothing pops in.
-      document.querySelectorAll('.seq .ls > *, .seq.ls > *, .seq.principles > li, .seq.dim-multi > .dim-line').forEach(el => el.classList.add('hidden'));
-      // For ls blocks that ARE the .seq themselves, hide their children too:
-      document.querySelectorAll('.seq.ls > *, .seq.principles > li, .seq.dim-multi > .dim-line').forEach(el => el.classList.add('hidden'));
+      // --- Pre-emptive blanking pass ---
+      // Stash content + blank every node we'll later type into. This MUST
+      // happen before any .seq wrapper gets .in, otherwise the browser
+      // paints a single frame of the full content before we blank it
+      // (that's the "briefly shows then types" flash).
 
-      // Cache stashed text for typed single-line outputs:
-      document.querySelectorAll('.seq.out').forEach(el => {
-        if (!el.classList.contains('dim-multi')) {
-          el.dataset.text = el.textContent.replace(/\s+/g, ' ').trim();
-        }
+      // Single-line typed outputs (e.g. whoami answer):
+      document.querySelectorAll('.seq.out:not(.dim-multi)').forEach(el => {
+        el.dataset.text = el.textContent.replace(/\s+/g, ' ').trim();
+        el.textContent = '';
       });
+      // Inline-HTML typed outputs (cat about.md):
+      document.querySelectorAll('.seq.cat').forEach(el => {
+        el.dataset.html = el.innerHTML;
+        el.textContent = '';
+      });
+      // Row-by-row blocks — hide each child:
+      document.querySelectorAll('.seq.ls > *, .seq.principles > li, .seq.dim-multi > .dim-line')
+        .forEach(el => el.classList.add('hidden'));
 
       // Final live caret hidden until the demo finishes.
       const liveCaret = document.getElementById('liveCaret');
