@@ -521,8 +521,39 @@ async function runPane(paneEl, def) {
    interactive shell — per pane
    ========================================================================= */
 const HISTORY_KEY = 'ff_shell_history_v1';
+const SEEDED_KEY  = 'ff_shell_seeded_v2';
+
+/* Preset "recent" commands users see when they hit ↑ on a fresh shell.
+   Order is chronological (oldest → newest), so ↑ surfaces `help` first,
+   then walks back through the demo trail. */
+const SEED_HISTORY = [
+  'whoami',
+  'cat about.md',
+  'ls',
+  'open viml',
+  'open qs',
+  'open ambler',
+  'open agentic',
+  'open finetuning',
+  'cat .principles',
+  'github',
+  'hf',
+  'date',
+  'sudo rm -rf /',
+  'help',
+];
+
 function loadHistory() {
-  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; }
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  // first visit (or storage cleared): seed with preset commands
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(SEED_HISTORY));
+    localStorage.setItem(SEEDED_KEY, '1');
+  } catch {}
+  return SEED_HISTORY.slice();
 }
 function saveHistory(h) {
   try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(-100))); } catch {}
