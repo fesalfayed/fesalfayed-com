@@ -76,32 +76,30 @@
     .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
     .titlebar__name { margin-left: .5rem; }
 
-    /* pane container — flexbox row, scroll on x */
+    /* pane container — flexbox row; on desktop, panes ALWAYS divide the
+       full window width evenly (1 pane = 100%, 2 = 50/50, n = 100/n).
+       We don't need horizontal scroll on desktop because the layout
+       always fills the viewport. */
     .panes {
       flex: 1; display: flex; flex-direction: row;
-      overflow-x: auto; overflow-y: hidden;
-      scroll-behavior: smooth;
+      overflow: hidden;
       min-height: 0;
     }
-    .panes::-webkit-scrollbar { height: 6px; }
-    .panes::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 3px; }
 
     .pane {
-      flex: 0 0 min(640px, 100%);
+      flex: 1 1 0;
+      min-width: 0;
       display: flex; flex-direction: column;
       border-right: 1px solid var(--line);
-      min-width: 0;
-      animation: splitIn .22s ease-out;
+      animation: splitIn .25s ease-out;
       background: var(--panel);
+      transition: flex-basis .25s ease;
     }
     .pane:last-child { border-right: none; }
     .pane.active { background: #131313; }
-    /* Single-pane mode: fill the whole window. As soon as a 2nd pane opens,
-       the `.panes.split` class kicks in and panes snap to fixed widths. */
-    .panes:not(.split) .pane { flex: 1 1 100%; }
     @keyframes splitIn {
-      from { opacity: 0; flex-basis: 0; }
-      to   { opacity: 1; flex-basis: min(640px, 100%); }
+      from { opacity: 0; transform: scaleX(.85); transform-origin: right; }
+      to   { opacity: 1; transform: scaleX(1); }
     }
 
     .pane__bar {
@@ -242,7 +240,7 @@
     }
     .hint .k { color: var(--yellow); }
 
-    /* mobile: stack panes vertically, full width */
+    /* mobile: stack panes vertically, full width, scrollable */
     @media (max-width: 700px) {
       .panes { flex-direction: column; overflow-x: hidden; overflow-y: auto; }
       .pane { flex: 0 0 auto; min-height: 70vh; width: 100%; border-right: 0; border-bottom: 1px solid var(--line); }
@@ -945,20 +943,14 @@ function rebuildTabs() {
   tabsEl.querySelectorAll('.tab').forEach(t => {
     t.addEventListener('click', () => {
       setActive(t.dataset.key);
-      const target = panesEl.querySelector(`.pane[data-key="${t.dataset.key}"]`);
-      if (target) target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
     });
   });
-  // single pane = fullscreen; >1 panes = tmux split
-  panesEl.classList.toggle('split', openOrder.length > 1);
 }
 
 async function openPane(key) {
   if (!PANES[key]) return;
   if (openOrder.includes(key)) {
     setActive(key);
-    const t = panesEl.querySelector(`.pane[data-key="${key}"]`);
-    if (t) t.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
     return;
   }
   const el = buildPane(key);
@@ -966,7 +958,6 @@ async function openPane(key) {
   openOrder.push(key);
   rebuildTabs();
   setActive(key);
-  setTimeout(() => el.scrollIntoView({ behavior: 'smooth', inline: 'end', block: 'nearest' }), 40);
   await runPane(el, PANES[key]);
 }
 
@@ -1000,8 +991,7 @@ document.addEventListener('keydown', e => {
     if (openOrder[i]) {
       setActive(openOrder[i]);
       const t = panesEl.querySelector(`.pane[data-key="${openOrder[i]}"]`);
-      if (t) { t.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
-               const inp = t.querySelector('.shellinput'); if (inp) inp.focus(); }
+      if (t) { const inp = t.querySelector('.shellinput'); if (inp) inp.focus(); }
     }
   }
 });
