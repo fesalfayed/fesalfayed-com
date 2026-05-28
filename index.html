@@ -96,6 +96,9 @@
     }
     .pane:last-child { border-right: none; }
     .pane.active { background: #131313; }
+    /* Single-pane mode: fill the whole window. As soon as a 2nd pane opens,
+       the `.panes.split` class kicks in and panes snap to fixed widths. */
+    .panes:not(.split) .pane { flex: 1 1 100%; }
     @keyframes splitIn {
       from { opacity: 0; flex-basis: 0; }
       to   { opacity: 1; flex-basis: min(640px, 100%); }
@@ -946,6 +949,8 @@ function rebuildTabs() {
       if (target) target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
     });
   });
+  // single pane = fullscreen; >1 panes = tmux split
+  panesEl.classList.toggle('split', openOrder.length > 1);
 }
 
 async function openPane(key) {
