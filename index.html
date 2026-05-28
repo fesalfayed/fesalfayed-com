@@ -623,6 +623,16 @@ const COMMANDS = {
   email:  { desc: 'compose email', run: (ctx) => { location.href = 'mailto:hi@fesalfayed.com'; printOut(ctx, `<div class="out dim"># mail to hi@fesalfayed.com</div>`); }},
   date:   { desc: 'current time', run: (ctx) => printOut(ctx, `<div class="out">${new Date().toString()}</div>`) },
   sudo:   { desc: 'denied', run: (ctx) => {
+    const tail = (ctx.args || []).join(' ').trim().toLowerCase();
+    // easter egg: sudo -i / sudo su / sudo bash / sudo -s → fake root shell
+    const ESCALATE = ['-i','su','su -','bash','-s','sh','zsh','fish','-su'];
+    if (ESCALATE.includes(tail)) {
+      printOut(ctx, `<div class="out dim">[sudo] password for fesal: <span style="color:var(--accent)">${'•'.repeat(8 + Math.floor(Math.random()*6))}</span></div>`);
+      setTimeout(() => printOut(ctx, `<div class="out" style="color:#22c55e">✓ authentication successful</div>`), 350);
+      setTimeout(() => printOut(ctx, `<div class="out dim">Loading kernel modules&hellip; <span style="color:var(--accent)">[OK]</span><br/>Mounting /proc/fesal/brain&hellip; <span style="color:var(--accent)">[OK]</span><br/>Spawning root shell&hellip;</div>`), 900);
+      setTimeout(() => promoteToRoot(ctx), 1700);
+      return;
+    }
     const lines = [
       'fesal is not in the sudoers file. This incident will be reported.',
       'sudo: a password is required',
@@ -655,7 +665,111 @@ function runOpen(ctx, arg) {
   openPane(key);
 }
 
+/* Prompt variants */
+const PROMPT_ROOT = (cwd) => `<span class="ps1">
+  <span class="u" style="color:#ff6b6b">root</span><span class="a">@</span><span class="h">fayed</span><span class="d">:</span><span class="c">${cwd}</span><span class="d" style="color:#ff6b6b">#</span>
+</span>`;
+
+/* Root-only commands. Composed into dispatch when paneEl.dataset.root === '1'. */
+const ROOT_COMMANDS = {
+  whoami: { run: (ctx) => printOut(ctx, `<div class="out" style="color:#ff6b6b">root</div><div class="out dim">uid=0(root) gid=0(root) groups=0(root)<br/># still fesal underneath though.</div>`) },
+  'rm -rf /': { run: (ctx) => fakeRmRfSlash(ctx) },
+  'rm -rf /*': { run: (ctx) => fakeRmRfSlash(ctx) },
+  'shutdown': { run: (ctx) => fakeShutdown(ctx) },
+  'shutdown now': { run: (ctx) => fakeShutdown(ctx) },
+  'shutdown -h now': { run: (ctx) => fakeShutdown(ctx) },
+  'halt': { run: (ctx) => fakeShutdown(ctx) },
+  'poweroff': { run: (ctx) => fakeShutdown(ctx) },
+  'reboot': { run: (ctx) => fakeReboot(ctx) },
+  'cat /etc/shadow': { run: (ctx) => printOut(ctx, `<div class="out dim">root:$6$<span style="color:var(--red)">REDACTED</span>:19876:0:99999:7:::<br/>fesal:$6$<span style="color:var(--red)">REDACTED</span>:19876:0:99999:7:::<br/>daemon:*:19876:0:99999:7:::<br/>agents:!:19876:0:99999:7:::</div><div class="out err"># lol no, this is a static site. those hashes are fake.</div>`) },
+  'cat /etc/passwd': { run: (ctx) => printOut(ctx, `<div class="out dim">root:x:0:0:root:/root:/bin/bash<br/>fesal:x:1000:1000:Fesal Fayed:/home/fesal:/bin/zsh<br/>agents:x:1337:1337:Hermes Council:/var/agents:/usr/bin/hermes<br/>nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin</div>`) },
+  'fortune': { run: (ctx) => {
+    const f = [
+      'agents type, humans steer.',
+      'fix the root, not the symptom.',
+      'pipelines are the unglamorous part that decides whether the cool stuff on top works.',
+      'local default, cloud on demand.',
+      'one project, one repo, one job.',
+    ];
+    printOut(ctx, `<div class="out">${f[Math.floor(Math.random()*f.length)]}</div>`);
+  }},
+  exit:   { run: (ctx) => demoteToFesal(ctx) },
+  logout: { run: (ctx) => demoteToFesal(ctx) },
+  'su fesal': { run: (ctx) => demoteToFesal(ctx) },
+};
+
+function fakeRmRfSlash(ctx) {
+  const steps = [
+    'rm: descending into /bin&hellip;',
+    'rm: descending into /etc&hellip;',
+    'rm: descending into /home/fesal&hellip;',
+    'rm: descending into /var/log&hellip;',
+    'rm: cannot remove /proc: Operation not permitted',
+    'rm: cannot remove /sys: Operation not permitted',
+    'kernel panic - not syncing: Attempted to kill init!',
+  ];
+  steps.forEach((s, i) => setTimeout(() => printOut(ctx, `<div class="out ${i === steps.length-1 ? 'err' : 'dim'}">${s}</div>`), i * 280));
+  setTimeout(() => printOut(ctx, `<div class="out dim" style="margin-top:.4rem">just kidding. you're on a webpage. <span style="color:var(--accent)">refresh</span> to reset, or type <span style="color:var(--blue)">exit</span>.</div>`), steps.length * 280 + 200);
+}
+function fakeShutdown(ctx) {
+  printOut(ctx, `<div class="out dim">Broadcast message from root@fayed:<br/>The system is going down for poweroff NOW!</div>`);
+  setTimeout(() => {
+    const body = ctx.paneEl.querySelector('.pane__body');
+    body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--dim);font-size:12px">[ system halted ]</div>`;
+    setTimeout(() => {
+      body.innerHTML = '';
+      mountShell(body, ctx.paneEl, ctx.cwd);
+      delete ctx.paneEl.dataset.root;
+      printOut(ctx, `<div class="out dim"># jk. shell restored.</div>`);
+    }, 1800);
+  }, 600);
+}
+function fakeReboot(ctx) {
+  const body = ctx.paneEl.querySelector('.pane__body');
+  body.innerHTML = `<div style="padding:1rem;color:var(--dim);font-size:12px">
+    [    0.000000] Linux version 6.66.6-fayed (fesal@fayed) <br/>
+    [    0.001234] Command line: BOOT_IMAGE=/vmlinuz root=/dev/sda1 quiet<br/>
+    [    0.002145] CPU: 1 PID: 1 Comm: swapper Not tainted<br/>
+    [    0.003789] systemd[1]: Starting fayed.service&hellip;<br/>
+    [    0.812345] systemd[1]: Starting agentic-os.target&hellip;<br/>
+    [    1.123456] hermes[42]: orchestrator profile loaded.<br/>
+    [    1.234567] hermes[43]: operator_a online.<br/>
+    [    1.345678] hermes[44]: operator_b online.<br/>
+    [    1.456789] welcome back, fesal.<br/>
+  </div>`;
+  setTimeout(() => {
+    body.innerHTML = '';
+    mountShell(body, ctx.paneEl, ctx.cwd);
+    delete ctx.paneEl.dataset.root;
+  }, 2200);
+}
+
 function escapeHTML(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* Root-mode easter egg: swap prompt to `root@fayed:<cwd>#`, change caret color,
+   and add a few root-only commands. `exit` (or `logout`) drops back to fesal@. */
+function promoteToRoot(ctx) {
+  ctx.paneEl.dataset.root = '1';
+  // re-mount the shell with the root prompt
+  const body = ctx.paneEl.querySelector('.pane__body');
+  const oldLive = body.querySelector('.liveline');
+  if (oldLive) oldLive.remove();
+  mountShell(body, ctx.paneEl, ctx.cwd);
+  // banner
+  const banner = `<div class="out" style="color:#fca5a5">
+    <span style="color:var(--yellow)">⚠</span>  you are now <b>root</b> on a static webpage. type <span style="color:var(--blue)">exit</span> to logout.<br/>
+    <span style="color:var(--dim)">try: </span><span style="color:var(--blue)">rm -rf /</span><span style="color:var(--dim)"> · </span><span style="color:var(--blue)">whoami</span><span style="color:var(--dim)"> · </span><span style="color:var(--blue)">shutdown now</span><span style="color:var(--dim)"> · </span><span style="color:var(--blue)">cat /etc/shadow</span>
+  </div>`;
+  printOut(ctx, banner);
+}
+function demoteToFesal(ctx) {
+  delete ctx.paneEl.dataset.root;
+  const body = ctx.paneEl.querySelector('.pane__body');
+  const oldLive = body.querySelector('.liveline');
+  if (oldLive) oldLive.remove();
+  mountShell(body, ctx.paneEl, ctx.cwd);
+  printOut(ctx, `<div class="out dim">logout. back to fesal@fayed.</div>`);
+}
 
 function printOut(ctx, html) {
   const wrap = document.createElement('div');
@@ -670,16 +784,27 @@ function executeCommand(raw, ctx) {
   const cmd = raw.trim();
   if (!cmd) return;
 
-  // echo the typed command above as a frozen line
+  const isRoot = ctx.paneEl.dataset.root === '1';
+  const PR = isRoot ? PROMPT_ROOT : PROMPT;
+
+  // echo the typed command above as a frozen line (using current prompt)
   const frozen = document.createElement('p');
   frozen.className = 'line';
-  frozen.innerHTML = `${PROMPT(ctx.cwd)} <span class="cmd">${escapeHTML(cmd)}</span>`;
+  frozen.innerHTML = `${PR(ctx.cwd)} <span class="cmd">${escapeHTML(cmd)}</span>`;
   const live = ctx.paneEl.querySelector('.liveline');
   live.parentNode.insertBefore(frozen, live);
 
-  // record history
+  // record history (don't pollute with the fake root demo, but keep it useful)
   const hist = loadHistory();
   if (hist[hist.length-1] !== cmd) { hist.push(cmd); saveHistory(hist); }
+
+  // ─── root mode dispatch ──────────────────────────────────────────────
+  if (isRoot) {
+    if (ROOT_COMMANDS[cmd]) return ROOT_COMMANDS[cmd].run(ctx);
+    const [rhead, ...rrest] = cmd.split(/\s+/);
+    if (ROOT_COMMANDS[rhead]) return ROOT_COMMANDS[rhead].run({ ...ctx, args: rrest });
+    // fall through to normal dispatch for shared commands (ls, pwd, etc.)
+  }
 
   // dispatch — exact-match multi-word first, then first-token
   if (COMMANDS[cmd]) { COMMANDS[cmd].run(ctx); return; }
@@ -705,9 +830,12 @@ function executeCommand(raw, ctx) {
 
 function mountShell(body, paneEl, cwd) {
   const paneKey = paneEl.dataset.key;
+  const isRoot = paneEl.dataset.root === '1';
+  const PR = isRoot ? PROMPT_ROOT : PROMPT;
   const line = document.createElement('p');
   line.className = 'line liveline';
-  line.innerHTML = `${PROMPT(cwd)} <input class="shellinput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="type help" aria-label="shell input" />`;
+  const caretColor = isRoot ? 'style="caret-color:#ff6b6b"' : '';
+  line.innerHTML = `${PR(cwd)} <input class="shellinput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="${isRoot ? 'root: type exit to logout' : 'type help'}" aria-label="shell input" ${caretColor} />`;
   body.appendChild(line);
 
   const input = line.querySelector('.shellinput');
