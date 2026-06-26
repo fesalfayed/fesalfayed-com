@@ -4,10 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>fesal@fayed:~</title>
-  <meta name="description" content="Fesal Fayed — builder. Agentic systems, quantified self, vertical intelligence." />
+  <meta name="description" content="Fesal Fayed — Data & ML engineer building agentic systems, tool-use fine-tunes, and applied ML." />
   <meta name="theme-color" content="#0a0a0a" />
   <meta property="og:title" content="fesal@fayed:~" />
-  <meta property="og:description" content="builder · agentic systems · miami" />
+  <meta property="og:description" content="agentic systems · tool-use fine-tuning · applied ML" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://fesalfayed.com" />
   <link rel="canonical" href="https://fesalfayed.com" />
@@ -287,9 +287,9 @@ const PANES = {
     path: "~",
     steps: [
       { cwd: "~", cmd: "whoami",
-        out: `<div class="out">Data &amp; ML Engineer<br/><span style="color:var(--dim)">B.S. Data Science &amp; Artificial Intelligence &mdash; Florida International University</span></div>` },
+        out: `<div class="out">Data &amp; ML Engineer<br/><span style="color:var(--dim)">Agentic systems · tool-use fine-tuning · applied ML<br/>B.S. Data Science &amp; Artificial Intelligence &mdash; Florida International University</span></div>` },
       { cwd: "~", cmd: "cat about.md",
-        out: `<div class="cat">I build <span class="k">agents</span> and fine-tune <span class="k">models</span>. I spend most of my time engineering pipelines that turn siloed sources into structured signal you can actually do something with.</div>` },
+        out: `<div class="cat">I build <span class="k">agents</span> and fine-tune <span class="k">models</span>. Current proof: 9k+ Hugging Face downloads across a Hermes-style <span class="k">gpt-oss-20b</span> tool-use fine-tune, a Fesal-authored fix landed in <span class="k">NousResearch/hermes-agent</span>, a merged <span class="k">hermes-lcm</span> context fix, and applied ML work on Amazon image quality + sales-rank modeling.</div>` },
       { cwd: "~", cmd: "cd projects/ && ls -la",
         cwdAfter: "~/projects",
         out: `<div class="ls">
@@ -315,6 +315,7 @@ const PANES = {
           <span class="perm">-rw-r--r--</span><span class="size">mail</span><span class="name link"><a href="mailto:hi@fesalfayed.com">hi@fesalfayed.com</a></span>
           <span class="perm">lrwxr-xr-x</span><span class="size">git</span><span class="name link"><a href="https://github.com/fesalfayed" rel="me" target="_blank">github.com/fesalfayed</a></span>
           <span class="perm">lrwxr-xr-x</span><span class="size">hf</span><span class="name link"><a href="https://huggingface.co/fesalfayed" rel="me" target="_blank">huggingface.co/fesalfayed</a></span>
+          <span class="perm">lrwxr-xr-x</span><span class="size">oss</span><span class="name link"><a href="https://github.com/fesalfayed/oss-contributions" target="_blank">oss-contributions</a></span>
         </div>` },
     ],
     tail: `
@@ -401,7 +402,7 @@ const PANES = {
     path: "~/projects/fine-tuning",
     steps: [
       { cwd: "~/projects/fine-tuning", cmd: "cat README.md",
-        out: `<div class="cat"><span class="k">hermes function-calling fine-tunes</span> &mdash; gpt-oss-20b tuned for tool use, released in four formats so it runs wherever: mlx for Apple Silicon, gguf for llama.cpp/Ollama/LM Studio, 4-bit for Colab, 16-bit for vLLM.</div>` },
+        out: `<div class="cat"><span class="k">hermes function-calling fine-tunes</span> &mdash; gpt-oss-20b tuned for tool use, released in four formats so it runs wherever: mlx for Apple Silicon, gguf for llama.cpp/Ollama/LM Studio, 4-bit for Colab, 16-bit for vLLM. Public artifact family: <a href="https://github.com/fesalfayed/gpt-oss-20b-hermes-tool-finetune" target="_blank">gpt-oss-20b-hermes-tool-finetune</a>.</div>` },
       { cwd: "~/projects/fine-tuning", cmd: "ls collection/",
         out: `<div class="ls">
           <span class="perm">lrwxr-xr-x</span><span class="size">hf</span><span class="name link"><a href="https://huggingface.co/collections/fesalfayed/finetuned-hermes-function-calling-v1" target="_blank">finetuned-hermes-function-calling-v1 &rarr;</a></span>
@@ -423,7 +424,7 @@ const PANES = {
             <span class="dl loading" data-model="gpt-oss-20b-hermes_agent-tool-finetune_16bit">…</span>
         </div>
         <div class="out dim" style="margin-top:-.4rem;">
-          # 2,400+ total downloads &middot; evals coming soon
+          # 9k+ total downloads &middot; evals documented transparently
         </div>` },
     ],
     after: async (paneEl) => {
