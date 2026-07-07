@@ -53,8 +53,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 
 <style>
-  .about { max-width: var(--measure); margin: 0 auto; padding-top: 2rem; }
-  .about h1 { font-size: 2.2rem; }
+  .about { max-width: var(--measure); margin: 0 auto; padding-top: 2.2222rem; }
+  .about h1 { font-size: 2.2222rem; letter-spacing: var(--track-display); }
   .about p { margin: 1rem 0; color: var(--fg-soft); }
-  .about p:first-of-type { font-size: 1.1rem; color: var(--fg); }
+  .about p:first-of-type { font-size: 1.1111rem; line-height: 1.45; color: var(--fg); }
+  .about a { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line); }
+  .about a:hover { text-decoration-color: var(--accent); }
 </style>
