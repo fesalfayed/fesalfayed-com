@@ -1,0 +1,253 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 5);
+
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+---
+<BaseLayout
+  title="Fesal Fayed — ML & agentic systems"
+  description="Fesal Fayed builds machine-learning and agentic systems: fine-tuned open models, personal data pipelines, and a fleet of cooperating AI agents. Miami / FIU."
+>
+  <section class="hero">
+    <h1>I build systems where<br /><em>models do real work.</em></h1>
+    <p class="lede">
+      Machine learning engineer in Miami. I fine-tune open models for tool use,
+      pipe my own life into a personal data store, and run a small fleet of
+      agents that operate infrastructure end-to-end. B.S. Data Science &amp; AI,
+      Florida International University. Co-founder of a stealth company applying
+      vertical intelligence to high-margin local operators.
+    </p>
+  </section>
+
+  <!-- ── systems board ─────────────────────────────────────────────── -->
+  <section class="board-section" aria-label="Live systems board">
+    <div class="board-head">
+      <h2>The board</h2>
+      <span class="board-note">a map of what's actually running · <span class="live-dot" aria-hidden="true"></span>live counts from the HF API</span>
+    </div>
+
+    <div class="board" id="board">
+      <svg class="board-svg" viewBox="0 0 900 380" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <!-- edges -->
+        <path class="edge" d="M170,90 C260,90 280,90 360,90" />
+        <path class="edge" d="M170,190 C260,190 280,130 360,105" />
+        <path class="edge" d="M530,90 C610,90 630,90 710,90" />
+        <path class="edge" d="M445,140 C445,190 445,210 445,250" />
+        <path class="edge" d="M530,280 C610,280 630,280 710,280" />
+        <path class="edge" d="M170,290 C250,290 280,285 360,278" />
+        <circle class="pulse p1" r="3" />
+        <circle class="pulse p2" r="3" />
+        <circle class="pulse p3" r="3" />
+      </svg>
+
+      <button class="node" style="--x:4%; --y:14%" data-panel="signals">
+        <span class="node-kind">input</span>
+        <span class="node-name">signals</span>
+        <span class="node-sub">biometrics · phone · journals</span>
+      </button>
+      <button class="node" style="--x:4%; --y:42%" data-panel="gpus">
+        <span class="node-kind">metal</span>
+        <span class="node-name">gpu fleet</span>
+        <span class="node-sub">training &amp; serving</span>
+      </button>
+      <button class="node" style="--x:4%; --y:70%" data-panel="stealth">
+        <span class="node-kind">company</span>
+        <span class="node-name">stealth co.</span>
+        <span class="node-sub">vertical intelligence</span>
+      </button>
+
+      <button class="node hub" style="--x:40%; --y:14%" data-panel="qs">
+        <span class="node-kind">pipeline</span>
+        <span class="node-name">qs</span>
+        <span class="node-sub">one schema for a life</span>
+      </button>
+      <button class="node hub" style="--x:40%; --y:62%" data-panel="agents">
+        <span class="node-kind">runtime</span>
+        <span class="node-name">agent fleet</span>
+        <span class="node-sub">cooperating profiles, real tools</span>
+      </button>
+
+      <button class="node" style="--x:79%; --y:14%" data-panel="models">
+        <span class="node-kind">output</span>
+        <span class="node-name">models</span>
+        <span class="node-sub"><span data-hf-total>9k+</span> downloads</span>
+      </button>
+      <button class="node" style="--x:79%; --y:62%" data-panel="writing">
+        <span class="node-kind">output</span>
+        <span class="node-name">writing</span>
+        <span class="node-sub">build logs, dissections</span>
+      </button>
+    </div>
+
+    <div class="panel" id="panel" hidden>
+      <div class="panel-body" id="panel-body"></div>
+    </div>
+  </section>
+
+  <!-- ── selected work ─────────────────────────────────────────────── -->
+  <section class="work">
+    <h2>Selected work</h2>
+    <ol class="work-list">
+      <li>
+        <div class="work-title">
+          <a href="/blog/gpt-oss-20b-tool-finetune/">gpt-oss-20b tool-use fine-tune</a>
+          <span class="work-badge" data-hf-total-badge>9k+ downloads</span>
+        </div>
+        <p>
+          LoRA SFT of OpenAI's 20B MoE for agent-loop tool calling, shipped as a
+          four-format family — BF16, MXFP4 4-bit, MLX, GGUF — so it runs on
+          everything from an H100 to a MacBook.
+          <a href="https://huggingface.co/collections/fesalfayed/finetuned-hermes-function-calling-v1">HF collection →</a>
+        </p>
+      </li>
+      <li>
+        <div class="work-title"><span>qs — quantified-self pipeline</span></div>
+        <p>
+          Vendor-pluggable ingestion of biometrics, phone context, training and
+          journal data into one SQLite schema, pulled daily by cron; the substrate
+          for behavior→outcome prediction models.
+        </p>
+      </li>
+      <li>
+        <div class="work-title"><span>agentic-os — a fleet that runs my infra</span></div>
+        <p>
+          Multiple agent profiles on a shared machine with real terminals, memory
+          providers, cron watchdogs and a kanban work queue — operating deploys,
+          pipelines and research runs while I sleep. Built on open-source agent
+          tooling; the wiring, guardrails and ops discipline are the work.
+        </p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ── writing feed ──────────────────────────────────────────────── -->
+  <section class="writing-feed">
+    <h2>Writing</h2>
+    {posts.length === 0 && <p class="dim">First post shipping soon.</p>}
+    <ul class="post-list">
+      {posts.map((p) => (
+        <li>
+          <a href={`/blog/${p.id}/`}>{p.data.title}</a>
+          <span class="post-date">{fmt(p.data.date)}</span>
+        </li>
+      ))}
+    </ul>
+    <p class="all-posts"><a href="/blog/">All posts →</a></p>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero { padding: 3.5rem 0 2rem; max-width: 46rem; }
+  .hero h1 { font-size: clamp(2.1rem, 5.5vw, 3.4rem); margin: 0 0 1.2rem; }
+  .hero h1 em { color: var(--accent); font-style: italic; }
+  .lede { font-size: 1.06rem; color: var(--fg-soft); max-width: var(--measure); }
+
+  .board-section { margin-top: 3rem; }
+  .board-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.5rem; }
+  .board-head h2, .work h2, .writing-feed h2 { font-size: 1.35rem; margin: 0 0 1rem; }
+  .board-note { font-family: var(--font-mono); font-size: 0.72rem; color: var(--fg-dim); }
+  .live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: blink 2.4s ease-in-out infinite; }
+  @keyframes blink { 50% { opacity: 0.25; } }
+
+  .board { position: relative; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-raise); aspect-ratio: 900 / 380; min-height: 300px; overflow: hidden; }
+  .board-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .edge { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 5; }
+  .pulse { fill: var(--accent); opacity: 0.85; }
+  .p1 { offset-path: path('M170,90 C260,90 280,90 360,90'); animation: travel 4s linear infinite; }
+  .p2 { offset-path: path('M530,90 C610,90 630,90 710,90'); animation: travel 4s linear infinite 1.3s; }
+  .p3 { offset-path: path('M530,280 C610,280 630,280 710,280'); animation: travel 4s linear infinite 2.1s; }
+  @keyframes travel { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+
+  .node { position: absolute; left: var(--x); top: var(--y); display: flex; flex-direction: column; gap: 0.1rem; text-align: left; background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.55rem 0.8rem; cursor: pointer; font-family: var(--font-mono); min-width: 9.5rem; transition: border-color 0.15s, transform 0.15s; }
+  .node:hover, .node[aria-expanded="true"] { border-color: var(--accent); transform: translateY(-1px); }
+  .node-kind { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-dim); }
+  .node-name { font-size: 0.95rem; font-weight: 500; color: var(--fg); }
+  .node-sub { font-size: 0.68rem; color: var(--fg-soft); }
+  .hub { border-width: 2px; }
+
+  .panel { margin-top: 0.8rem; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: var(--radius); background: var(--bg-raise); }
+  .panel-body { padding: 1rem 1.2rem; font-size: 0.92rem; color: var(--fg-soft); max-width: none; }
+  .panel-body :global(strong) { color: var(--fg); }
+
+  .work { margin-top: 3.5rem; }
+  .work-list { list-style: none; margin: 0; padding: 0; counter-reset: work; }
+  .work-list li { border-top: 1px solid var(--line); padding: 1.2rem 0; counter-increment: work; }
+  .work-list li::before { content: counter(work, decimal-leading-zero); font-family: var(--font-mono); font-size: 0.72rem; color: var(--fg-dim); }
+  .work-title { display: flex; align-items: baseline; gap: 0.8rem; flex-wrap: wrap; font-size: 1.08rem; font-weight: 600; margin: 0.2rem 0 0.3rem; }
+  .work-badge { font-family: var(--font-mono); font-size: 0.68rem; color: var(--accent); border: 1px solid var(--accent-soft); background: var(--accent-soft); border-radius: 99px; padding: 0.1rem 0.55rem; }
+  .work-list p { margin: 0; color: var(--fg-soft); max-width: var(--measure); }
+
+  .writing-feed { margin-top: 3.5rem; }
+  .post-list { list-style: none; margin: 0; padding: 0; }
+  .post-list li { display: flex; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--line); padding: 0.7rem 0; }
+  .post-date { font-family: var(--font-mono); font-size: 0.75rem; color: var(--fg-dim); white-space: nowrap; }
+  .all-posts { margin-top: 0.8rem; font-family: var(--font-mono); font-size: 0.85rem; }
+  .dim { color: var(--fg-dim); }
+
+  @media (max-width: 720px) {
+    .board { aspect-ratio: auto; min-height: 0; }
+    .board-svg { display: none; }
+    .board { position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; padding: 0.8rem; }
+    .node { position: static; min-width: 0; }
+  }
+</style>
+
+<script>
+  const PANELS: Record<string, string> = {
+    signals: `<strong>signals.</strong> Wearable biometrics (Ultrahuman today; the schema is vendor-pluggable), iOS context — location, screen time, messages, calendar — plus lifting logs, nutrition and PHQ-9 journal entries. Everything lands in one store on a daily cron.`,
+    gpus: `<strong>gpu fleet.</strong> A home rig plus rented burst capacity for fine-tuning runs and local serving. Training happens where it's cheapest; inference comes home.`,
+    stealth: `<strong>stealth co.</strong> Co-founder. Vertical intelligence for high-margin local operators. More when it's ready.`,
+    qs: `<strong>qs.</strong> The personal-data pipeline: one SQLite schema, per-vendor ingest adapters, daily pulls. The point is the downstream question — can models trained on your own exhaust predict tomorrow's mood, energy, and output? Substrate first, then models.`,
+    agents: `<strong>agent fleet.</strong> Several agent profiles share this machine — an orchestrator for infra, operators for execution — with real terminals, persistent memory, cron watchdogs and a kanban queue with leases and dead-letter retry. They deploy sites, run research pipelines, and file their own work logs. Built on open-source agent tooling; my work is the wiring and the guardrails.`,
+    models: `<strong>models.</strong> A four-format fine-tune family of gpt-oss-20b for tool calling — BF16 / 4-bit / MLX / GGUF, <span data-hf-panel-total>9k+</span> downloads across the family. Read the build log in <a href="/blog/gpt-oss-20b-tool-finetune/">writing</a>.`,
+    writing: `<strong>writing.</strong> Build logs and dissections of these systems — result first, negative results included, references at the end. <a href="/blog/">Browse →</a>`,
+  };
+
+  const board = document.getElementById('board');
+  const panel = document.getElementById('panel');
+  const body = document.getElementById('panel-body');
+  let open = '';
+
+  board?.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('[data-panel]') as HTMLElement | null;
+    if (!btn || !panel || !body) return;
+    const key = btn.dataset.panel!;
+    document.querySelectorAll('.node[aria-expanded]').forEach((n) => n.removeAttribute('aria-expanded'));
+    if (open === key) { panel.hidden = true; open = ''; return; }
+    btn.setAttribute('aria-expanded', 'true');
+    body.innerHTML = PANELS[key] ?? '';
+    panel.hidden = false;
+    open = key;
+    fillCounts();
+  });
+
+  // live HF download counts — real API, graceful failure
+  const REPOS = [
+    'fesalfayed/gpt-oss-20b-hermes_agent-tool-finetune_16bit',
+    'fesalfayed/gpt-oss-20b-hermes_agent-tool-finetune_4bit',
+    'fesalfayed/gpt-oss-20b-hermes_agent-tool-finetune_mlx',
+    'fesalfayed/gpt-oss-20b-hermes_agent-tool-finetune_gguf',
+  ];
+  let total = 0;
+  async function loadCounts() {
+    try {
+      const counts = await Promise.all(
+        REPOS.map((r) => fetch(`https://huggingface.co/api/models/${r}?expand[]=downloadsAllTime`).then((x) => x.json()))
+      );
+      total = counts.reduce((s, c) => s + (c.downloadsAllTime ?? 0), 0);
+      if (total > 0) fillCounts();
+    } catch { /* keep the static 9k+ */ }
+  }
+  function fillCounts() {
+    if (total <= 0) return;
+    const t = total.toLocaleString();
+    document.querySelectorAll('[data-hf-total]').forEach((el) => (el.textContent = t));
+    document.querySelectorAll('[data-hf-total-badge]').forEach((el) => (el.textContent = `${t} downloads`));
+    document.querySelectorAll('[data-hf-panel-total]').forEach((el) => (el.textContent = t));
+  }
+  loadCounts();
+</script>

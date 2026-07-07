@@ -1,0 +1,6 @@
+.git/
+node_modules/
+.wrangler/
+README.md
+wrangler.jsonc
+_legacy/

@@ -2,8 +2,11 @@
   "name": "fesalfayed-com",
   "compatibility_date": "2026-05-27",
   "assets": {
-    "directory": "./",
+    "directory": "./dist",
     "not_found_handling": "404-page"
+  },
+  "build": {
+    "command": "npm install && npm run build"
   },
   "routes": [
     { "pattern": "fesalfayed.com", "custom_domain": true },

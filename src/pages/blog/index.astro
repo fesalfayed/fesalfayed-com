@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+---
+<BaseLayout title="Writing — Fesal Fayed" description="Build logs and dissections of ML and agentic systems: fine-tunes, pipelines, agents. Result first, negative results included.">
+  <section class="blog-index">
+    <h1>Writing</h1>
+    <p class="blog-lede">
+      Build logs and dissections. The house rules: result first, honest
+      negative-results sections, references at the end.
+      <a href="/rss.xml">Subscribe via RSS</a>.
+    </p>
+    <ul class="index-list">
+      {posts.map((p) => (
+        <li>
+          <time class="idx-date" datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time>
+          <div>
+            <a class="idx-title" href={`/blog/${p.id}/`}>{p.data.title}</a>
+            <p class="idx-desc">{p.data.description}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .blog-index { max-width: var(--measure); margin: 0 auto; padding-top: 2rem; }
+  .blog-index h1 { font-size: 2.2rem; margin: 0 0 0.6rem; }
+  .blog-lede { color: var(--fg-soft); margin-bottom: 2rem; }
+  .index-list { list-style: none; margin: 0; padding: 0; }
+  .index-list li { display: grid; grid-template-columns: 7.5rem 1fr; gap: 1rem; border-top: 1px solid var(--line); padding: 1.1rem 0; }
+  .idx-date { font-family: var(--font-mono); font-size: 0.75rem; color: var(--fg-dim); padding-top: 0.25rem; }
+  .idx-title { font-size: 1.15rem; font-weight: 600; }
+  .idx-desc { margin: 0.3rem 0 0; color: var(--fg-soft); font-size: 0.92rem; }
+  @media (max-width: 560px) { .index-list li { grid-template-columns: 1fr; gap: 0.2rem; } }
+</style>

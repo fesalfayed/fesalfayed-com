@@ -1,24 +1,42 @@
 # fesalfayed.com
 
-Personal site for Fesal Fayed — Data & ML engineer focused on agentic systems,
-tool-use fine-tuning, and applied ML.
+Personal site + blog. **v7** — Astro static build (hybrid: bespoke interactive
+"systems board" homepage + markdown blog), deployed on Cloudflare Workers
+static assets.
 
-Static HTML + Tailwind/CDN-free inline CSS. Deployed through Cloudflare Pages.
+## Stack
 
-## Public proof surfaced
+- Astro 5 (content collections, MDX-ready) — zero JS by default
+- Shiki dual-theme syntax highlighting, server-side KaTeX
+- RSS (`/rss.xml`), sitemap, per-post OG meta
+- Fonts: Newsreader / Inter / JetBrains Mono
 
-- 9k+ Hugging Face downloads across the `gpt-oss-20b` Hermes-style tool-use fine-tune family.
-- Fesal-authored Anthropic adapter fix landed in `NousResearch/hermes-agent`.
-- Merged `hermes-lcm` context-role fix.
-- Amazon image-quality + BSR modeling case study.
+## Develop
+
+```bash
+npm install
+npm run dev      # localhost:4321
+npm run build    # -> dist/
+```
 
 ## Deploy
 
-Push to `main` → Cloudflare Pages auto-builds & ships. No build step (pure static).
+Push to `main` → Cloudflare Workers Builds runs `npm install && npm run build`
+(from `wrangler.jsonc` `build.command`) then `npx wrangler versions upload`,
+serving `dist/` as static assets on fesalfayed.com.
 
-## Local preview
+## Write a post
 
-```bash
-python3 -m http.server 8000
-# open http://localhost:8000
+Drop a `.md`/`.mdx` file in `src/content/blog/` with frontmatter:
+
+```yaml
+---
+title: "..."
+description: "..."
+date: 2026-07-06
+tags: [a, b]
+draft: false   # true hides it everywhere
+---
 ```
+
+TOC, reading time, heading anchors, RSS and sitemap entries are automatic.

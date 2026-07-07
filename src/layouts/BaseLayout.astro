@@ -1,0 +1,83 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  canonicalUrl?: string;
+  article?: boolean;
+}
+const { title, description, ogImage, canonicalUrl, article = false } = Astro.props;
+const canonical = canonicalUrl ?? new URL(Astro.url.pathname, Astro.site).href;
+const og = ogImage ?? new URL('/og-default.png', Astro.site).href;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="alternate" type="application/rss+xml" title="Fesal Fayed — blog" href="/rss.xml" />
+  <meta name="generator" content={Astro.generator} />
+
+  <meta property="og:type" content={article ? 'article' : 'website'} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={og} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={og} />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <script is:inline>
+    (() => {
+      const saved = localStorage.getItem('ff-theme');
+      const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      if (dark) document.documentElement.classList.add('dark');
+    })();
+  </script>
+  <slot name="head" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-head">
+      <a class="brand" href="/">fesal fayed</a>
+      <nav>
+        <a href="/" aria-current={Astro.url.pathname === '/' ? 'page' : undefined}>index</a>
+        <a href="/blog/" aria-current={Astro.url.pathname.startsWith('/blog') ? 'page' : undefined}>writing</a>
+        <a href="/about/" aria-current={Astro.url.pathname.startsWith('/about') ? 'page' : undefined}>about</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">◐</button>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-foot">
+      <span>© {new Date().getFullYear()} Fesal Fayed</span>
+      <span>
+        <a href="https://github.com/fesalfayed">github</a> ·
+        <a href="https://huggingface.co/fesalfayed">huggingface</a> ·
+        <a href="mailto:hi@fesalfayed.com">hi@fesalfayed.com</a> ·
+        <a href="/rss.xml">rss</a>
+      </span>
+    </footer>
+  </div>
+  <script is:inline>
+    document.getElementById('theme-toggle')?.addEventListener('click', () => {
+      const el = document.documentElement;
+      el.classList.toggle('dark');
+      localStorage.setItem('ff-theme', el.classList.contains('dark') ? 'dark' : 'light');
+    });
+  </script>
+</body>
+</html>
+<style is:global>
+  @import '../styles/tokens.css';
+</style>

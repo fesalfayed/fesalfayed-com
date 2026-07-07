@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="About — Fesal Fayed" description="Who Fesal Fayed is: ML engineer in Miami, FIU Data Science & AI, fine-tuner of open models, builder of agentic infrastructure.">
+  <article class="about">
+    <h1>About</h1>
+
+    <p>
+      I'm Fesal. I live in Miami and I build machine-learning systems that do
+      work — not demos, not decks. The through-line in everything below is the
+      same: take a model, wire it into real infrastructure with real data, and
+      make it operate.
+    </p>
+
+    <p>
+      I studied Data Science &amp; Artificial Intelligence at Florida
+      International University. Somewhere along the way the interesting part of
+      ML stopped being the model and became the <em>system around the model</em>:
+      the data pipelines feeding it, the tool interfaces it acts through, the
+      guardrails that let it run unattended. That's the lane I work in.
+    </p>
+
+    <p>
+      Concretely, right now that means three things. I fine-tune open models for
+      agentic tool use — my <a href="/blog/gpt-oss-20b-tool-finetune/">gpt-oss-20b
+      tool-calling family</a> ships in four formats and has crossed 9k+ downloads
+      on Hugging Face. I run a personal-data pipeline (<em>qs</em>) that pulls my
+      biometrics, phone context, training and journal data into one schema —
+      substrate for models that predict my own behavior. And I operate a small
+      fleet of AI agents that manage my infrastructure: they deploy sites, run
+      research pipelines, watch cron jobs, and file their own work logs on a
+      kanban queue.
+    </p>
+
+    <p>
+      I'm also co-founder of a company still in stealth — vertical intelligence
+      for high-margin local operators. More on that when it's ready.
+    </p>
+
+    <p>
+      I write <a href="/blog/">build logs and dissections</a> of these systems.
+      House rules: the result comes first, the things that didn't work get their
+      own section, and claims come with references. If a post reads like
+      marketing, I've failed.
+    </p>
+
+    <p>
+      Talk to me: <a href="mailto:hi@fesalfayed.com">hi@fesalfayed.com</a> ·
+      <a href="https://github.com/fesalfayed">GitHub</a> ·
+      <a href="https://huggingface.co/fesalfayed">Hugging Face</a>
+    </p>
+  </article>
+</BaseLayout>
+
+<style>
+  .about { max-width: var(--measure); margin: 0 auto; padding-top: 2rem; }
+  .about h1 { font-size: 2.2rem; }
+  .about p { margin: 1rem 0; color: var(--fg-soft); }
+  .about p:first-of-type { font-size: 1.1rem; color: var(--fg); }
+</style>
